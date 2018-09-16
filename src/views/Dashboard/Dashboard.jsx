@@ -111,11 +111,12 @@ class Dashboard extends React.Component {
 
   constructor(props) {
     super(props);
+    let account_ = localStorage["accountCode"];
     this.state = {
       data: [],
       alert: null,
       show: false,
-      filter: {account:"exito_1"
+      filter: {account:account_
               ,startDate:0
               ,endDate:0
               ,headquarter:"0"
@@ -125,9 +126,14 @@ class Dashboard extends React.Component {
       indicador1: {},
       indicador2: {},
       indicador3:[],
+      indicador4: {},
       colouredLinesChart:{},
       simpleBarChart:{},
       donutChart:{},
+      headquarterList:[],
+      zoneList:[],
+      campaignList:[],
+      questionList:[],
       termometerChart:{}
     };
   }
@@ -183,6 +189,149 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     console.log("--componentDidMount");
+
+    //cargar las sedes 
+    const urlHe = "http://54.188.210.238:8080/parameter/headquarter?account="+this.state.filter.account;
+    axios.get(urlHe)
+    .then(res => {
+      const dataResp = res.data;
+      console.log("--OK ");
+      
+      var index = 0;
+      const list = dataResp
+      .map(object => {
+          index++;
+          console.log("--object " + object.name);
+          return (
+              <MenuItem
+                classes={{
+                  root: this.props.classes.selectMenuItem,
+                  selected: this.props.classes.selectMenuItemSelected
+                }}
+                value={object.code}
+              >
+             {object.name}
+             </MenuItem>
+          );
+      });
+
+      this.setState({headquarterList: list});
+      
+    }).catch(error => {
+      console.log("--Error: " + error);
+    }).then(() => {
+      // always executed
+      console.log("--End request: ");
+      
+    });
+
+
+    //cargar las zonas 
+    const urlZo = "http://54.188.210.238:8080/parameter/zone?account="+this.state.filter.account;
+    axios.get(urlZo)
+    .then(res => {
+      const dataResp = res.data;
+      console.log("--OK ");
+      
+      var index = 0;
+      const list = dataResp
+      .map(object => {
+          index++;
+          console.log("--object " + object.name);
+          return (
+              <MenuItem
+                classes={{
+                  root: this.props.classes.selectMenuItem,
+                  selected: this.props.classes.selectMenuItemSelected
+                }}
+                value={object.code}
+              >
+             {object.name}
+             </MenuItem>
+          );
+      });
+
+      this.setState({zoneList: list});
+      
+    }).catch(error => {
+      console.log("--Error: " + error);
+    }).then(() => {
+      // always executed
+      console.log("--End request: ");
+      
+    });
+
+    //cargar las campañas 
+    const urlCa = "http://54.188.210.238:8080/campaign?user="+this.state.filter.account;
+    axios.get(urlCa)
+    .then(res => {
+      const dataResp = res.data;
+      console.log("--OK ");
+      
+      var index = 0;
+      const list = dataResp
+      .map(object => {
+          index++;
+          console.log("--object " + object.name);
+          return (
+              <MenuItem
+                classes={{
+                  root: this.props.classes.selectMenuItem,
+                  selected: this.props.classes.selectMenuItemSelected
+                }}
+                value={object.code}
+              >
+             {object.title}
+             </MenuItem>
+          );
+      });
+
+      this.setState({campaignList: list});
+      
+    }).catch(error => {
+      console.log("--Error: " + error);
+    }).then(() => {
+      // always executed
+      console.log("--End request: ");
+      
+    });
+
+    //cargar las preguntas 
+    const urlPr = "http://54.188.210.238:8080/campaign/question?user="+this.state.filter.account;
+    axios.get(urlPr)
+    .then(res => {
+      const dataResp = res.data;
+      console.log("--OK ");
+      
+      var index = 0;
+      const list = dataResp
+      .map(object => {
+          index++;
+          console.log("--object " + object.name);
+          return (
+              <MenuItem
+                classes={{
+                  root: this.props.classes.selectMenuItem,
+                  selected: this.props.classes.selectMenuItemSelected
+                }}
+                value={object.code}
+              >
+             {object.title}
+             </MenuItem>
+          );
+      });
+
+      this.setState({questionList: list});
+      
+    }).catch(error => {
+      console.log("--Error: " + error);
+    }).then(() => {
+      // always executed
+      console.log("--End request: ");
+      
+    });
+
+
     this.loadData();
   }
 
@@ -191,6 +340,7 @@ search = () => {
   }
 
   loadData = () => {
+  
     this.showAlert();
     const url1 = "http://54.188.210.238:8080/dashboard/generalCSATIndicator?account="+this.state.filter.account+"&startDate="+this.state.filter.startDate+"&endDate="+this.state.filter.endDate+"&headquarter="+this.state.filter.headquarter+"&zone="+this.state.filter.zone+"&campaign="+this.state.filter.campaign+"&question="+this.state.filter.question;
    
@@ -315,7 +465,24 @@ search = () => {
         console.log("--End request: ");
       })
 
-    
+      const url6 = "http://54.188.210.238:8080/dashboard/generalRequestAssistanceIndicator?account="+this.state.filter.account+"&startDate="+this.state.filter.startDate+"&endDate="+this.state.filter.endDate+"&headquarter="+this.state.filter.headquarter+"&zone="+this.state.filter.zone+"&campaign="+this.state.filter.campaign+"&question="+this.state.filter.question;
+   
+      console.log("--url6 " + url6);
+      axios.get(url6)
+        .then(res => {
+          const object = res.data;
+          console.log("--OK ");
+          var indicador4 = {};
+          indicador4["total_assistance"] =  object.total_assistance;
+          this.setState({indicador4: indicador4});
+          
+        }).catch(error => {
+          console.log("--Error: " + error);
+        }).then(() => {
+          // always executed
+          console.log("--End request: ");
+        })
+
   }
 
 
@@ -395,24 +562,9 @@ search = () => {
                value="0">
                Seleccione una sede...
              </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1001"
-             >
-               Éxito Colina
-             </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1002"
-             >
-               Éxito Poblado
-             </MenuItem>
+
+            {this.state.headquarterList}
+
            </Select>
          </FormControl>
 
@@ -444,63 +596,8 @@ search = () => {
                value="0">
                Seleccione una zona...
              </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1001001"
-             >
-               Éxito Colina - Carnes
-             </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1001002"
-             >
-               Éxito Colina - Servicio al Cliente Electrodigital
-             </MenuItem>
 
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1001003"
-             >
-               Éxito Colina - Centro de Información
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1002001"
-             >
-               Éxito Poblado - Comidas Preparadas
-             </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1002002"
-             >
-               Éxito Poblado - Tokio piso 2
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1002003"
-             >
-               Éxito Poblado - Telefonía
-             </MenuItem>
+              {this.state.zoneList}
 
            </Select>
          </FormControl>
@@ -532,64 +629,10 @@ search = () => {
                value="0">
                Seleccione una campaña...
              </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10001"
-             >
-               Carnes
-             </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10002"
-             >
-               Electrodigital
-             </MenuItem>
 
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10003"
-             >
-               Servicio a cliente
-             </MenuItem>
+            {this.state.campaignList}
 
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10004"
-             >
-               Baños
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10005"
-             >
-               Comidas Preparadas / restaurante
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10006"
-             >
-               Cajas
-             </MenuItem>
+            
            </Select>
          </FormControl>
      
@@ -620,184 +663,10 @@ search = () => {
                value="0">
                Seleccione una pregunta...
              </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1"
-             >
-               Variedad y frescura de las carnes y cortes
-             </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="2"
-             >
-               Agilidad del despacho del pedido
-             </MenuItem>
 
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="4"
-             >
-               Limpieza y orden de la sección
-             </MenuItem>
+            {this.state.questionList}
 
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="6"
-             >
-               Amabilidad y cortesía del personal de la sección
-             </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="7"
-             >
-               Respuesta oportuna y clara
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="8"
-             >
-               Conocimiento del personal
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="9"
-             >
-               Amabilidad y cortesía del personal de la sección
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10"
-             >
-               Presentación personal de los empleados de la sección
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="11"
-             >
-               Personal disponible para la asesoría
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="12"
-             >
-               Conocimiento del producto y su funcionalidad
-             </MenuItem>
-
-               <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="13"
-             >
-               Variedad en productos
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="14"
-             >
-               Amabilidad y cortesía del personal de la sección
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="15"
-             >
-               Agilidad en el registro, pago y empaque de sus productos
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="16"
-             >
-               Tiempo de espera en la fila de la caja
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="17"
-             >
-               Cantidad de cajas que estaban abiertas al momento de su pago
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="18"
-             >
-               Amabilidad y cortesía del personal de la sección
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="19"
-             >
-               Aseo y limpieza de la sección
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="20"
-             >
-               Amabilidad y cortesía del personal de la sección
-             </MenuItem>
-
+             
            </Select>
          </FormControl>
      
@@ -907,8 +776,8 @@ search = () => {
             </Card>
           </GridItem>
 
-          <GridItem xs={6}>
-            <Card>
+          <GridItem xs={6} alignItems="stretch">
+            <Card className="h-75 d-inline-block">
               <CardHeader color="info" icon>
                 <CardIcon color="info">
                   <Assignment />
@@ -970,7 +839,37 @@ search = () => {
             </Card>
           </GridItem>
 
-        
+        <GridItem xs={12} sm={6} md={6} lg={3}>
+            <Card>
+              <CardHeader color="info" icon>
+                <CardIcon color="info">
+                  <Timeline />
+                </CardIcon>
+                <h4 className={classes.cardIconTitle}>Solicitudes de asistencia</h4>
+              </CardHeader>
+              <CardBody>
+              <GridContainer>
+                <br />
+                <br />
+                  
+                  <GridItem xs={12} sm={12} md={12} lg={12}>
+                  <GridContainer>
+                    <GridItem xs={6} sm={6} md={6} lg={6}>
+                      <img src={carita5} alt="Excelente"  style={{width:80, height:80}}/>
+                    </GridItem>
+                    <GridItem xs={6} sm={6} md={6} lg={6}>
+                      <h2>{this.state.indicador4.total_assistance}</h2>
+                    </GridItem>
+                  </GridContainer>
+                    
+                  </GridItem> 
+
+       
+                </GridContainer>
+              </CardBody>
+            
+            </Card>
+          </GridItem>
         
         </GridContainer>
 

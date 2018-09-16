@@ -55,13 +55,17 @@ class ReactTables extends React.Component {
 
   constructor(props) {
     super(props);
+    let account_ = localStorage["accountCode"];
     this.state = {
       data: [],
       csvData:[],
       report: [],
+      headquarterList:[],
+      zoneList:[],
+      campaignList:[],
       alert: null,
       show: false,
-      filter: {account:"exito_1"
+      filter: {account:account_
               ,startDate:0
               ,endDate:0
               ,headquarter:"0"
@@ -116,6 +120,113 @@ class ReactTables extends React.Component {
 
   componentDidMount() {
     console.log("--componentDidMount");
+
+//cargar las sedes 
+const urlHe = "http://54.188.210.238:8080/parameter/headquarter?account="+this.state.filter.account;
+axios.get(urlHe)
+.then(res => {
+  const dataResp = res.data;
+  console.log("--OK ");
+  
+  var index = 0;
+  const list = dataResp
+  .map(object => {
+      index++;
+      console.log("--object " + object.name);
+      return (
+          <MenuItem
+            classes={{
+              root: this.props.classes.selectMenuItem,
+              selected: this.props.classes.selectMenuItemSelected
+            }}
+            value={object.code}
+          >
+         {object.name}
+         </MenuItem>
+      );
+  });
+
+  this.setState({headquarterList: list});
+  
+}).catch(error => {
+  console.log("--Error: " + error);
+}).then(() => {
+  // always executed
+  console.log("--End request: ");
+  
+});
+
+
+//cargar las zonas 
+const urlZo = "http://54.188.210.238:8080/parameter/zone?account="+this.state.filter.account;
+axios.get(urlZo)
+.then(res => {
+  const dataResp = res.data;
+  console.log("--OK ");
+  
+  var index = 0;
+  const list = dataResp
+  .map(object => {
+      index++;
+      console.log("--object " + object.name);
+      return (
+          <MenuItem
+            classes={{
+              root: this.props.classes.selectMenuItem,
+              selected: this.props.classes.selectMenuItemSelected
+            }}
+            value={object.code}
+          >
+         {object.name}
+         </MenuItem>
+      );
+  });
+
+  this.setState({zoneList: list});
+  
+}).catch(error => {
+  console.log("--Error: " + error);
+}).then(() => {
+  // always executed
+  console.log("--End request: ");
+  
+});
+
+//cargar las campañas 
+const urlCa = "http://54.188.210.238:8080/campaign?user="+this.state.filter.account;
+axios.get(urlCa)
+.then(res => {
+  const dataResp = res.data;
+  console.log("--OK ");
+  
+  var index = 0;
+  const list = dataResp
+  .map(object => {
+      index++;
+      console.log("--object " + object.name);
+      return (
+          <MenuItem
+            classes={{
+              root: this.props.classes.selectMenuItem,
+              selected: this.props.classes.selectMenuItemSelected
+            }}
+            value={object.code}
+          >
+         {object.title}
+         </MenuItem>
+      );
+  });
+
+  this.setState({campaignList: list});
+  
+}).catch(error => {
+  console.log("--Error: " + error);
+}).then(() => {
+  // always executed
+  console.log("--End request: ");
+  
+});
+
     this.loadData();
   }
 
@@ -135,11 +246,11 @@ class ReactTables extends React.Component {
         console.log("--OK " + details);
         var data = [];
         var csvData = [];
-        let arrayHeader = ["Campaña", "Pregunta", "CSAT", "Excelente", "Bueno", "Regular", "Malo", "Deficiente"];
+        let arrayHeader = ["Campaña", "Pregunta", "Total", "CSAT", "Excelente", "Bueno", "Regular", "Malo", "Deficiente"];
         csvData.push(arrayHeader);
         const list = details.map(object => {
 
-          var array = [object.campaign_name, object.question_item_name, object.csat, object.total_excellent, object.total_good,object.total_moderate,object.total_bad,object.total_poor];
+          var array = [object.campaign_name, object.question_item_name, object.total, object.csat, object.total_excellent, object.total_good,object.total_moderate,object.total_bad,object.total_poor];
           data.push(array);
           csvData.push(array);
 
@@ -228,24 +339,8 @@ class ReactTables extends React.Component {
                         value="0">
                         Seleccione una sede...
                       </MenuItem>
-                      <MenuItem
-                        classes={{
-                          root: classes.selectMenuItem,
-                          selected: classes.selectMenuItemSelected
-                        }}
-                        value="1001"
-                      >
-                        Éxito Colina
-                      </MenuItem>
-                      <MenuItem
-                        classes={{
-                          root: classes.selectMenuItem,
-                          selected: classes.selectMenuItemSelected
-                        }}
-                        value="1002"
-                      >
-                        Éxito Poblado
-                      </MenuItem>
+                      {this.state.headquarterList}
+
                     </Select>
                   </FormControl>
 
@@ -277,64 +372,9 @@ class ReactTables extends React.Component {
                value="0">
                Seleccione una zona...
              </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1001001"
-             >
-               Éxtio Colina - Carnes
-             </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1001002"
-             >
-               Éxito Colina - Servicio al Cliente Electrodigital
-             </MenuItem>
 
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1001003"
-             >
-               Éxito Colina - Centro de Información
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1002001"
-             >
-               Éxito Poblado - Comidas Preparadas
-             </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1002002"
-             >
-               Éxito Poblado - Tokio piso 2
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="1002003"
-             >
-               Éxito Poblado - Telefonía
-             </MenuItem>
-
+             {this.state.zoneList}
+            
            </Select>
          </FormControl>
 
@@ -366,64 +406,8 @@ class ReactTables extends React.Component {
                value="0">
                Seleccione una campaña...
              </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10001"
-             >
-               Carnes
-             </MenuItem>
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10002"
-             >
-               Electrodigital
-             </MenuItem>
 
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10003"
-             >
-               Servicio a cliente
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10004"
-             >
-               Baños
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10005"
-             >
-               Comidas Preparadas / restaurante
-             </MenuItem>
-
-             <MenuItem
-               classes={{
-                 root: classes.selectMenuItem,
-                 selected: classes.selectMenuItemSelected
-               }}
-               value="10006"
-             >
-               Cajas
-             </MenuItem>
+            {this.state.campaignList}
 
            </Select>
          </FormControl>
@@ -459,7 +443,7 @@ class ReactTables extends React.Component {
               <CardBody>
                 <Table
                   tableHeaderColor="primary"
-                  tableHead={["Campaña", "Pregunta", "CSAT", "Excelente", "Bueno", "Regular", "Malo", "Deficiente"]}
+                  tableHead={["Campaña", "Pregunta", "Total", "CSAT", "Excelente", "Bueno", "Regular", "Malo", "Deficiente"]}
                   tableData={this.state.data}
                 />
               </CardBody>
