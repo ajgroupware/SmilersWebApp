@@ -58,7 +58,9 @@ class ReactTables extends React.Component {
     let account_ = localStorage["accountCode"];
     this.state = {
       data: [],
+      dataBoolean: [],
       csvData:[],
+      csvDataBoolean:[],
       report: [],
       headquarterList:[],
       zoneList:[],
@@ -265,6 +267,34 @@ axios.get(urlCa)
         console.log("--End request: ");
         this.hideAlert();
       })
+
+      const url2 = "http://54.188.210.238:8080/reports/reportCampaignBoolean?account="+this.state.filter.account+"&startDate="+this.state.filter.startDate+"&endDate="+this.state.filter.endDate+"&headquarter="+this.state.filter.headquarter+"&zone="+this.state.filter.zone+"&campaign="+this.state.filter.campaign;
+      console.log("--url2 " + url2);
+      axios.get(url2)
+      .then(res => {
+        const details = res.data;
+        console.log("--OK2 " + details);
+        var dataBoolean = [];
+        var csvDataBoolean = [];
+        let arrayHeader = ["Campaña", "Pregunta", "Total", "Si", "No"];
+        csvDataBoolean.push(arrayHeader);
+        const list = details.map(object => {
+
+          var array = [object.campaign_name, object.question_item_name, object.total, object.total_yes_answer, object.total_no_answer];
+          dataBoolean.push(array);
+          csvDataBoolean.push(array);
+
+        });
+
+        this.setState({dataBoolean: dataBoolean, csvDataBoolean: csvDataBoolean});
+        
+      }).catch(error => {
+        console.log("--Error: " + error);
+      }).then(() => {
+        // always executed
+        console.log("--End request: ");
+        this.hideAlert();
+      })
   }
 
   render() {
@@ -445,6 +475,25 @@ axios.get(urlCa)
                   tableHeaderColor="primary"
                   tableHead={["Campaña", "Pregunta", "Total", "CSAT", "Excelente", "Bueno", "Regular", "Malo", "Deficiente"]}
                   tableData={this.state.data}
+                />
+              </CardBody>
+            </Card>
+          </GridItem>
+
+          <GridItem xs={12}>
+            <Card>
+              <CardHeader color="info" icon>
+                <CardIcon color="info">
+                  <Assignment />
+                </CardIcon>
+                <h4 className={classes.cardIconTitle}>Campañas</h4>
+                <CSVLink data={this.state.csvDataBoolean} filename={"reporte_camp.csv"}>Exportar a excel</CSVLink>
+              </CardHeader>
+              <CardBody>
+                <Table
+                  tableHeaderColor="primary"
+                  tableHead={["Campaña", "Pregunta", "Total", "SI", "NO"]}
+                  tableData={this.state.dataBoolean}
                 />
               </CardBody>
             </Card>
